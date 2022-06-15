@@ -20,8 +20,8 @@ class elPacman{
             {4,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,2,1,1,1,1,1,1,1,1,1,2,2,2,2,4},
             {1,2,2,2,2,2,2,2,1,2,2,2,2,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1},
             {1,2,3,3,2,2,1,1,1,1,2,2,2,2,2,1,2,2,2,3,3,3,2,3,3,3,2,3,3,2,1},
-            {1,2,3,2,2,2,2,2,2,1,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
-            {1,2,3,2,1,2,3,3,2,1,2,2,1,2,2,2,2,1,1,1,1,1,2,1,1,2,3,2,1,2,1},
+            {1,2,3,2,2,2,2,2,2,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1},
+            {1,2,3,2,1,2,3,3,2,1,2,2,1,2,2,0,2,1,1,1,1,1,2,1,1,2,3,2,1,2,1},
             {1,2,2,2,1,2,3,3,2,1,2,2,1,2,2,2,2,1,2,2,2,2,2,2,2,2,3,2,2,2,1},
             {1,2,1,1,1,2,3,3,2,1,2,2,2,2,2,1,1,1,2,3,3,3,2,2,2,2,2,2,1,2,1},
             {1,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,2,1,2,3,3,3,2,2,1,2,1,2,2,2,1},
@@ -38,12 +38,17 @@ class elPacman{
 			{16, 9 },
 			{16, 10}
 		};
-		int totalDeMonedas = 380;
+		int[] monedasObtenidas = {0};
 
-		do {
-			pasaElTiempo(elReloj);
-			imprimeMundo(matrizDelMapa, elPersonaje, losFantasmas, elReloj);
-		} while (procesaMovimiento(matrizDelMapa, elPersonaje, losFantasmas));
+		if (monedasObtenidas[0] < 380){
+			do {
+				pasaElTiempo(elReloj);
+				imprimeMundo(matrizDelMapa, elPersonaje, losFantasmas, elReloj, monedasObtenidas);
+			} while (monedasObtenidas[0] < 380 && (procesaMovimiento(matrizDelMapa, elPersonaje, losFantasmas)));
+		} else {
+			imprimeMundo(matrizDelMapa, elPersonaje, losFantasmas, elReloj, monedasObtenidas);
+			System.out.println("Has obtenido todas las monedas, y ganado el juego!");
+		}
     }
 
     private static void pasaElTiempo(int[] elReloj) {
@@ -73,7 +78,7 @@ class elPacman{
 
 		if (hora < 4 || hora >= 21){return 3;}
 		if (hora >= 4 && hora < 8) {return ((int)(3.0 + ((32.0/240.0) * (minutos - 240.0))));}
-		if (hora >= 17 && hora < 21) {return ((int)(35.0 + ((-32.0/240.0) * (minutos - 1030.0))));}
+		if (hora >= 17 && hora < 21) {return ((int)(35.0 + ((-32.0 / 240.0) * (minutos - 1030.0))));}
 		return 35;
 	}
 
@@ -91,12 +96,12 @@ class elPacman{
 		if (inputUsuario.equals("d")) {laDireccion = 'E';} else
 		if (inputUsuario.equals("f")) {return false;}
 
-		mueveFantasmas(elMapa, losFantasmas);
-		mueve(elPersonaje[0], elMapa, laDireccion);
+		moverFantasmas(elMapa, losFantasmas);
+		mover(elPersonaje[0], elMapa, laDireccion);
 		return true;
 	}
 
-	private static void mueve(int[] unPersonaje, int[][] matrizDelMapa, char unaDireccion ){
+	private static void mover(int[] unPersonaje, int[][] matrizDelMapa, char unaDireccion ){
 
 		int elPersonajeX, elPersonajeY;
 		elPersonajeX = unPersonaje[0];
@@ -123,21 +128,22 @@ class elPacman{
 		unPersonaje[1] = elPersonajeY;	
 	}
 
-	private static void mueveFantasmas(int[][] elMapa, int[][] losFantasmas) {
+	private static void moverFantasmas(int[][] elMapa, int[][] losFantasmas) {
 
-		char[] laDireccion = {'N','S','E','O'};
+		char[] laDireccion = {'N','O','S','E'};
 		char unaDireccion = ' ';
 
-		for (int unFantasma = 0; unFantasma < losFantasmas.length; unFantasma++) {
+		for (int unFantasma = 0; unFantasma < losFantasmas.length; unFantasma = unFantasma + 1) {
 			Random random = new Random();
-			unaDireccion = laDireccion[random.nextInt(3)];
-			mueve(losFantasmas[unFantasma], elMapa, unaDireccion);
+			
+			unaDireccion = laDireccion[random.nextInt(4)];
+			mover(losFantasmas[unFantasma], elMapa, unaDireccion);
 		}
 	}
 
 	private static boolean hayFantasma(int[][] losFantasmas, int i, int j) {
 
-		for (int unFantasma = 0; unFantasma < losFantasmas.length; unFantasma++) {
+		for (int unFantasma = 0; unFantasma < losFantasmas.length; unFantasma = unFantasma + 1) {
 			if (losFantasmas[unFantasma][0] == j && losFantasmas[unFantasma][1] == i) {
 				return true;
 			}
@@ -146,12 +152,11 @@ class elPacman{
 	}
 
 	private static void limpiaPantalla() {
-
 		System.out.print("\033[H\033[2J");
 		System.out.flush();
 	}
 
-    private static void imprimeMundo(int[][] elMapa, int[][] elPersonaje, int[][] losFantasmas, int[] elReloj) {
+    private static void imprimeMundo(int[][] elMapa, int[][] elPersonaje, int[][] losFantasmas, int[] elReloj, int[] monedasObtenidas) {
 
 		limpiaPantalla();
 		imprimeBordeHorizontal(elMapa[0].length);
@@ -161,6 +166,10 @@ class elPacman{
 			
 			for (int j = 0; j < elMapa[i].length; j = j + 1) {
 				if (puedoVer(i, j, elPersonaje)) {
+					if ((i == elPersonaje[0][1] && j == elPersonaje[0][0]) && elMapa[i][j] == 2){
+						elMapa[i][j] = 0;
+						monedasObtenidas[0] = monedasObtenidas[0] + 1;
+					}
 					if (i == elPersonaje[0][1] && j == elPersonaje[0][0]) {
 						imprimePersonaje();
 					} else {
@@ -177,16 +186,34 @@ class elPacman{
 			imprimeBordeVertical(true);
 		}
 		imprimeBordeHorizontal(elMapa[0].length);
-		imprimeStatus(elPersonaje, losFantasmas, elReloj);
+		imprimeStatus(elPersonaje, losFantasmas, elReloj, monedasObtenidas);
 	}
 
-    private static void imprimeStatus(int[][] elPersonaje, int[][] losFantasmas, int[] elReloj) {
+    private static void imprimeStatus(int[][] elPersonaje, int[][] losFantasmas, int[] elReloj, int[] monedasObtenidas) {
 
 		System.out.println("Reloj: [" + elReloj[0] + ":" + elReloj[1] + "]");
 		System.out.println("Alcance de vision: [" + ALCANCE_ANTORCHA + "]");
+		System.out.println("Monedas obtenidas: " + monedasObtenidas[0]);
 		System.out.println("\nPacMan = (" + elPersonaje[0][0] + ", " + elPersonaje[0][1] + ")");
 		for (int unFantasma = 0; unFantasma < losFantasmas.length; unFantasma++) {
 			System.out.println("Fantasma [#" + unFantasma + "] = (" + losFantasmas[unFantasma][0] + ", " + losFantasmas[unFantasma][1] + ")");
+		}
+	}
+
+	private static void imprimeBordeHorizontal(int laLongitud) {
+
+		System.out.print("+");
+		for (int j = 0; j < laLongitud; j = j + 1) {
+			System.out.print("---");
+		}
+		System.out.println("+");
+	}
+
+	private static void imprimeBordeVertical(boolean esBordeDerecho) {
+
+		System.out.print("|");
+		if (esBordeDerecho) {
+			System.out.println();
 		}
 	}
 
@@ -202,19 +229,7 @@ class elPacman{
 		System.out.print(matrizDeElementos[elementoDelMapa]);
 	}
 
-    private static void imprimirVacio() {
-
-		System.out.print(INICIO + BLACK + BLACK_BACKGROUND + "   " + RESET);
-
-	}
-
-	private static boolean puedoVer(int i, int j, int[][] elPersonaje) {
-
-		return Math.pow(elPersonaje[0][0] - j, 2) + Math.pow(elPersonaje[0][1] - i, 2) <= Math.pow(ALCANCE_ANTORCHA, 2);
-
-	}
-
-    private static void imprimePersonaje() {
+	private static void imprimePersonaje() {
 		System.out.print(INICIO + BLACK + YELLOW_BACKGROUND + "°< " + RESET);
 	}
 
@@ -222,21 +237,14 @@ class elPacman{
 		System.out.print(INICIO + YELLOW_BOLD + RED_BACKGROUND + "°w°" + RESET);
 	}
 
-    private static void imprimeBordeHorizontal(int laLongitud) {
-
-		System.out.print("+");
-		for (int j = 0; j < laLongitud; j = j + 1) {
-			System.out.print("---");
-		}
-		System.out.println("+");
+    private static void imprimirVacio() {
+		System.out.print(INICIO + BLACK + BLACK_BACKGROUND + "   " + RESET);
 	}
 
-	private static void imprimeBordeVertical(boolean esBordeDerecho) {
+	private static boolean puedoVer(int i, int j, int[][] elPersonaje) {
 
-		System.out.print("|");
-		if (esBordeDerecho) {
-			System.out.println();
-		}
+		return Math.pow(elPersonaje[0][0] - j, 2) + Math.pow(elPersonaje[0][1] - i, 2) <= Math.pow(ALCANCE_ANTORCHA, 2);
+
 	}
 
 	private static int ALCANCE_ANTORCHA = 3;
